@@ -15,12 +15,13 @@ export async function saveSharpImage(
   file: Express.Multer.File
 ): Promise<{ path: string; filename: string; isBright: boolean }> {
   const sanitized = sanitizeFilename(file.originalname);
-  const filename = `${sanitized.name}.jpeg`;
+  const originalExtension = path.extname(file.originalname).toLowerCase();
+  const filename = `${sanitized.name}${originalExtension}`;
   const filePath = path.join(imageUploadDir, filename);
 
   const image = sharp(file.buffer);
   const metadata = await image.metadata();
-  const maxLength = 3840; //4k
+  const maxLength = 3840;
 
   // Check if resizing is needed
   if (
@@ -33,13 +34,15 @@ export async function saveSharpImage(
         ? { width: maxLength }
         : { height: maxLength };
 
-    await image.resize(resizeOptions).jpeg({ quality: 80 }).toFile(filePath);
-  } else {
-    // Save the file as is if no resizing is required
-    await image.jpeg({ quality: 80 }).toFile(filePath);
+    await image.resize(resizeOptions);
   }
 
-  //
+  // Save the image in the correct format based on the original file extension
+  const format = metadata.format || "jpg";
+
+  await image.toFormat(format, { quality: 80 }).toFile(filePath);
+
+  // Check if the image is bright
   const isBright = await isImageBright(file.buffer);
 
   return {

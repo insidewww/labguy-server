@@ -6,7 +6,6 @@ import { notFoundResponse, successResponse } from "../utils/responses";
 import { prisma } from "../prismaclient";
 import TagsController from "./TagsController";
 import { parseId } from "../utils/helpers";
-import { Post } from "@prisma/client";
 
 export class PostController extends Controller {
   constructor() {
@@ -17,6 +16,9 @@ export class PostController extends Controller {
     const posts = await prisma.post.findMany({
       include: {
         general: true,
+      },
+      orderBy: {
+        general: { updatedAt: "desc" },
       },
     });
     successResponse(res, posts);
