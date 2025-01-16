@@ -29,6 +29,7 @@ async function fetchData(endpoint: string) {
 async function getVideoData(req: Request, res: Response): Promise<any> {
   const getVideoId = (await import("get-video-id")).default;
   const { youtube_url, soundcloud_url, vimeo_url } = req.body;
+
   let videoData;
 
   switch (true) {
@@ -97,7 +98,6 @@ async function getVideoData(req: Request, res: Response): Promise<any> {
       badRequestResponse(res, "No valid URL provided");
       return;
   }
-
   return videoData;
 }
 
@@ -112,10 +112,12 @@ export class VideoController extends MediaController {
   });
 
   upsert = expressAsyncHandler(async (req: Request, res: Response) => {
+    const { youtube_url, soundcloud_url, vimeo_url } = req.body;
     const videoData = await getVideoData(req, res);
+
     let reference;
 
-    if (videoData.yt_url) {
+    if (youtube_url) {
       reference = {
         etag: videoData.etag,
         public_id: videoData.id,
@@ -127,9 +129,10 @@ export class VideoController extends MediaController {
         duration: videoData.contentDetails.duration,
         definition: videoData.contentDetails.definition,
       };
-    } else if (videoData.vimeo_url) {
+    } else if (vimeo_url) {
       reference = videoData;
     }
+
     const mediaRef = await prisma.videoRef.upsert({
       where: { etag: reference.etag },
       update: reference,

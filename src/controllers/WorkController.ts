@@ -158,7 +158,7 @@ export class WorkController extends ProjectsOnWorksController {
       media: req.body.media,
       urls,
     };
-    console.debug(newData);
+
     // Update the work entry
     const updatedRecord = await prisma.work.update({
       where: { id: workId }, // Specify the Work ID to update

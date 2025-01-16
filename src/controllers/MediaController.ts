@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { prisma } from "../prismaclient";
 import { successResponse } from "../utils/responses";
+import { VideoRef } from "@prisma/client";
 
 export class MediaController {
   delegate: any;
@@ -55,11 +56,18 @@ export class MediaController {
   });
 
   deleteManyMedia = asyncHandler(async (req: Request, res: Response) => {
-    const etags: string[] = req.body.etags;
+    const etags: string[] = req.body.map((media: VideoRef) => media.etag);
+
+    if (!Array.isArray(etags) || etags.length === 0) {
+      res.status(400).json({
+        message: 'Invalid request: "etags" must be a non-empty array.',
+      });
+    }
 
     const deleted = await this.delegate.deleteMany({
       where: { etag: { in: etags } },
     });
+
     successResponse(res, deleted);
   });
 }
