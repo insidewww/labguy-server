@@ -10,6 +10,7 @@ import projectRouter from "./routers/ProjectRouter";
 import workRouter from "./routers/WorkRouter";
 import tagsRouter from "./routers/TagsRouter";
 import threedRouter from "./routers/3dRouter";
+import generalRouter from "./routers/GeneralRouter";
 
 //New Router instance
 const router = Router();
@@ -31,4 +32,6 @@ router.use("/media", mediaRouter);
 router.use("/tags", tagsRouter);
 router.use("/models", threedRouter);
 
+//
+router.use("/general", generalRouter);
 export default router;
